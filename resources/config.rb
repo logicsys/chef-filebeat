@@ -25,11 +25,16 @@ action :create do
 
   new_resource.conf_file = new_resource.conf_file || default_conf_file(filebeat_install_resource.conf_dir)
 
+  major_version = filebeat_install_resource.version.split(/\./).first.to_i
+
   config = new_resource.config.dup
   logging_files_path = node['platform'] == 'windows' ? "#{filebeat_install_resource.conf_dir}/logs" : filebeat_install_resource.log_dir
 
-  config['filebeat.registry_file'] = node['platform'] == 'windows' ? "#{filebeat_install_resource.conf_dir}/registry" : '/var/lib/filebeat/registry'
-  config['filebeat.config_dir'] = filebeat_install_resource.prospectors_dir
+  unless major_version >= 7
+    config['filebeat.registry_file'] = node['platform'] == 'windows' ? "#{filebeat_install_resource.conf_dir}/registry" : '/var/lib/filebeat/registry'
+    config['filebeat.config_dir'] = filebeat_install_resource.prospectors_dir
+  end
+
   config['logging.files']['path'] ||= logging_files_path
 
   # Filebeat and psych v1.x don't get along.
