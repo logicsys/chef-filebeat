@@ -27,7 +27,7 @@ action :create do
   new_resource.conf_dir = new_resource.conf_dir || default_config_dir(new_resource.version, new_resource.windows_base_dir)
   new_resource.prospectors_dir = new_resource.prospectors_dir || default_prospectors_dir(new_resource.conf_dir)
   new_resource.log_dir = new_resource.log_dir || default_log_dir(new_resource.conf_dir)
-  version_string = %w[fedora rhel amazon].include?(node['platform_family']) ? "#{new_resource.version}-#{new_resource.release}" : new_resource.version
+  version_string = %w[fedora rhel amazon].include?(node['platform_family']) || node['platform'] == 'xcp' ? "#{new_resource.version}-#{new_resource.release}" : new_resource.version
 
   with_run_context(:root) do
     edit_resource(:service, new_resource.service_name) do
@@ -120,15 +120,68 @@ action :create do
         end
       end
     end
-
+    
     package 'filebeat' do # ~FC009
       version version_string unless new_resource.ignore_package_version
       options new_resource.apt_options if new_resource.apt_options && node['platform_family'] == 'debian'
       notifies :restart, "service[#{new_resource.service_name}]" if new_resource.notify_restart && !new_resource.disable_service
-      if %w[rhel amazon].include?(node['platform_family'])
+      if %w[rhel amazon].include?(node['platform_family']) 
         flush_cache(:before => true)
         allow_downgrade true
       end
+    end
+  else
+    if node['platform'] == 'xcp'
+
+      old_platform = node['platform']
+      node.override['platform'] = "centos" 
+      
+      old_platform_family = node['platform_family']
+      node.override['platform_family'] = "rhel" 
+      
+      old_platform_version = node['platform_version']
+      node.override['platform_version'] = "7.9.2009" 
+
+
+      # setup yum/apt repository
+      elastic_repo_opts = new_resource.elastic_repo_options.dup
+      elastic_repo_opts['version'] = new_resource.version
+      elastic_repo 'default' do
+        elastic_repo_opts.each do |key, value|
+          send(key, value) unless value.nil?
+        end
+        only_if { new_resource.setup_repo }
+      end
+
+      # raise "aaaaaaah"
+
+      
+
+
+      include_recipe 'yum-plugin-versionlock::default'
+
+      edit_resource!(:package, 'yum-plugin-versionlock') do
+        action :nothing
+      end
+
+      yum_package 'yum-plugin-versionlock'
+
+      unless new_resource.ignore_package_version # ~FC023
+        yum_version_lock 'filebeat' do
+          version new_resource.version
+          release new_resource.release
+          action :update
+        end
+      end
+
+      yum_package 'filebeat' do # ~FC009
+        version version_string unless new_resource.ignore_package_version
+        options new_resource.apt_options if new_resource.apt_options && node['platform_family'] == 'debian'
+        notifies :restart, "service[#{new_resource.service_name}]" if new_resource.notify_restart && !new_resource.disable_service
+        flush_cache(:before => true)
+        allow_downgrade true
+      end
+
     end
   end
 
