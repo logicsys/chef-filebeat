@@ -1,20 +1,20 @@
 #
-# Cookbook Name:: filebeat
+# Cookbook:: filebeat
 # Resource:: filebeat_service
 #
 
-resource_name :filebeat_service
-
 property :service_name, String, default: 'filebeat'
 property :filebeat_install_resource_name, String, default: 'default'
-property :disable_service, [TrueClass, FalseClass], default: false
-property :purge_prospectors_dir, [TrueClass, FalseClass], default: false
+property :disable_service, [true, false], default: false
+property :purge_prospectors_dir, [true, false], default: false
 
-property :service_ignore_failure, [TrueClass, FalseClass], default: false
+property :service_ignore_failure, [true, false], default: false
 property :service_retries, Integer, default: 2
 property :service_retry_delay, Integer, default: 0
 
 default_action :create
+
+unified_mode true
 
 action :create do
   install_preview_resource = check_beat_resource(Chef.run_context, :filebeat_install_preview, new_resource.filebeat_install_resource_name)
@@ -45,10 +45,10 @@ action :create do
     not_if { new_resource.disable_service }
   end
 
-  service_action = new_resource.disable_service ? %i[disable stop] : %i[enable]
+  service_action = new_resource.disable_service ? %i(disable stop) : %i(enable)
 
   service new_resource.service_name do
-    provider Chef::Provider::Service::Solaris if node['platform_family'] == 'solaris2'
+    provider Chef::Provider::Service::Solaris if platform_family?('solaris2')
     retries new_resource.service_retries
     retry_delay new_resource.service_retry_delay
     supports :status => true, :restart => true

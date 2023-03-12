@@ -26,7 +26,7 @@ describe 'filebeat::lwrp_test' do
 
   context 'rhel-install' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new(step_into: ['filebeat_install'], platform: 'centos', version: '6.8') do |node|
+      ChefSpec::SoloRunner.new(step_into: ['filebeat_install'], platform: 'centos', version: '6') do |node|
         node.automatic['platform_family'] = 'rhel'
       end.converge(described_recipe)
     end
@@ -50,7 +50,7 @@ describe 'filebeat::lwrp_test' do
 
   context 'ubuntu-install' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new(step_into: ['filebeat_install'], platform: 'ubuntu', version: '14.04') do |node|
+      ChefSpec::SoloRunner.new(step_into: ['filebeat_install'], platform: 'ubuntu', version: '16.04') do |node|
         node.automatic['platform_family'] = 'debian'
       end.converge(described_recipe)
     end
@@ -99,7 +99,7 @@ describe 'filebeat::lwrp_test' do
     end
 
     it 'run powershell_script to install filebeat as service' do
-      expect(chef_run.windows_zipfile('C:/opt/filebeat')).to notify('powershell_script[install filebeat as service]').to(:run).immediately
+      expect(chef_run.archive_file('C:/opt/filebeat')).to notify('powershell_script[install filebeat as service]').to(:run).immediately
       expect(chef_run).to_not run_powershell_script('install filebeat as service')
     end
   end
@@ -129,7 +129,7 @@ describe 'filebeat::lwrp_test' do
 
   context 'rhel-service' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new(step_into: ['filebeat_service'], platform: 'centos', version: '6.8') do |node|
+      ChefSpec::SoloRunner.new(step_into: ['filebeat_service'], platform: 'centos', version: '6') do |node|
         node.automatic['platform_family'] = 'rhel'
       end.converge(described_recipe)
     end
@@ -141,7 +141,7 @@ describe 'filebeat::lwrp_test' do
 
   context 'ubuntu-service' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new(step_into: ['filebeat_service'], platform: 'ubuntu', version: '14.04') do |node|
+      ChefSpec::SoloRunner.new(step_into: ['filebeat_service'], platform: 'ubuntu', version: '16.04') do |node|
         node.automatic['platform_family'] = 'debian'
       end.converge(described_recipe)
     end

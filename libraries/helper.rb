@@ -27,25 +27,23 @@ module Filebeat
     end
 
     def win_package_url(version, package_url)
-      package_url = if version < '5.0'
-                      package_url == 'auto' ? "https://download.elastic.co/beats/filebeat/filebeat-#{version}-windows.zip" : package_url
-                    else
-                      package_url == 'auto' ? "https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-#{version}-windows-#{machine_arch}.zip" : package_url
-                    end
-      package_url
+      if version < '5.0'
+        package_url == 'auto' ? "https://download.elastic.co/beats/filebeat/filebeat-#{version}-windows.zip" : package_url
+      else
+        package_url == 'auto' ? "https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-#{version}-windows-#{machine_arch}.zip" : package_url
+      end
     end
 
     def default_config_dir(version, windows_base_dir)
-      conf_dir = if node['platform'] == 'windows'
-                   if version < '5.0'
-                     "#{windows_base_dir}/filebeat-#{version}-windows"
-                   else
-                     "#{windows_base_dir}/filebeat-#{version}-windows-#{machine_arch}"
-                   end
-                 else
-                   '/etc/filebeat'
-                 end
-      conf_dir
+      if node['platform'] == 'windows'
+        if version < '5.0'
+          "#{windows_base_dir}/filebeat-#{version}-windows"
+        else
+          "#{windows_base_dir}/filebeat-#{version}-windows-#{machine_arch}"
+        end
+      else
+        '/etc/filebeat'
+      end
     end
 
     def default_conf_file(conf_dir)
