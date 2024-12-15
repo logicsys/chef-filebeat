@@ -1,19 +1,17 @@
 #
-# Cookbook Name:: filebeat
+# Cookbook:: filebeat
 # Resource:: filebeat_prospector
 #
-
-resource_name :filebeat_prospector
 
 property :service_name, String, default: 'filebeat'
 property :filebeat_install_resource_name, String, default: 'default'
 property :prefix, String, default: 'lwrp-prospector-'
 property :config, [Array, Hash], default: {}
-property :cookbook_file_name, [String, NilClass], default: nil
-property :cookbook_file_name_cookbook, [String, NilClass], default: nil
-property :disable_service, [TrueClass, FalseClass], default: false
-property :notify_restart, [TrueClass, FalseClass], default: true
-property :config_sensitive, [TrueClass, FalseClass], default: false
+property :cookbook_file_name, [String, NilClass]
+property :cookbook_file_name_cookbook, [String, NilClass]
+property :disable_service, [true, false], default: false
+property :notify_restart, [true, false], default: true
+property :config_sensitive, [true, false], default: false
 
 default_action :create
 
@@ -33,7 +31,7 @@ action :create do
   end
 
   # file_content = { 'filebeat' => { 'prospectors' => config } }.to_yaml
-  file_content = JSON.parse({ 'filebeat' => { 'prospectors' => config } }.to_json).to_yaml.lines.to_a[1..-1].join
+  file_content = YAML.dump(JSON.parse({ 'filebeat' => { 'prospectors' => config } }.to_json)).lines.to_a[1..-1].join
 
   # ...and put this back the way we found them.
   YAML::ENGINE.yamler = defaultengine if Psych::VERSION.start_with?('1')
@@ -44,7 +42,7 @@ action :create do
       source new_resource.cookbook_file_name
       cookbook new_resource.cookbook_file_name_cookbook
       notifies :restart, "service[#{new_resource.service_name}]" if new_resource.notify_restart && !new_resource.disable_service
-      mode 0o600
+      mode '600'
       sensitive new_resource.config_sensitive
     end
   else
@@ -52,7 +50,7 @@ action :create do
       path ::File.join(filebeat_install_resource.prospectors_dir, "#{new_resource.prefix}#{new_resource.name}.yml")
       content file_content
       notifies :restart, "service[#{new_resource.service_name}]" if new_resource.notify_restart && !new_resource.disable_service
-      mode 0o600
+      mode '600'
       sensitive new_resource.config_sensitive
     end
   end

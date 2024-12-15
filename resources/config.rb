@@ -1,19 +1,17 @@
 #
-# Cookbook Name:: filebeat
+# Cookbook:: filebeat
 # Resource:: filebeat_config
 #
 
 default_config = { 'filebeat.prospectors' => [], 'filebeat.modules' => [], 'prospectors' => [] }
 
-resource_name :filebeat_config
-
 property :service_name, String, default: 'filebeat'
 property :filebeat_install_resource_name, String, default: 'default'
 property :config, Hash, default: default_config
-property :conf_file, [String, NilClass], default: nil
-property :disable_service, [TrueClass, FalseClass], default: false
-property :notify_restart, [TrueClass, FalseClass], default: true
-property :config_sensitive, [TrueClass, FalseClass], default: false
+property :conf_file, [String, NilClass]
+property :disable_service, [true, false], default: false
+property :notify_restart, [true, false], default: true
+property :config_sensitive, [true, false], default: false
 
 default_action :create
 
@@ -28,10 +26,10 @@ action :create do
   major_version = filebeat_install_resource.version.split(/\./).first.to_i
 
   config = new_resource.config.dup
-  logging_files_path = node['platform'] == 'windows' ? "#{filebeat_install_resource.conf_dir}/logs" : filebeat_install_resource.log_dir
+  logging_files_path = platform?('windows') ? "#{filebeat_install_resource.conf_dir}/logs" : filebeat_install_resource.log_dir
 
   unless major_version >= 7
-    config['filebeat.registry_file'] = node['platform'] == 'windows' ? "#{filebeat_install_resource.conf_dir}/registry" : '/var/lib/filebeat/registry'
+    config['filebeat.registry_file'] = platform?('windows') ? "#{filebeat_install_resource.conf_dir}/registry" : '/var/lib/filebeat/registry'
     config['filebeat.config_dir'] = filebeat_install_resource.prospectors_dir
   end
 
@@ -44,9 +42,9 @@ action :create do
   end
 
   file new_resource.conf_file do
-    content JSON.parse(config.to_json).to_yaml.lines.to_a[1..-1].join
+    content YAML.dump(JSON.parse(config.to_json)).lines.to_a[1..-1].join
     notifies :restart, "service[#{new_resource.service_name}]" if new_resource.notify_restart && !new_resource.disable_service
-    mode 0o600
+    mode '600'
     sensitive new_resource.config_sensitive
   end
 

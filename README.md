@@ -58,7 +58,6 @@ Also works on Solaris zones given a physical Solaris 11.2 server. For that, use 
 
 ## Cookbook Dependency
 
-- `homebrew`
 - `elastic_repo`
 - `yum-plugin-versionlock`
 - `runit`

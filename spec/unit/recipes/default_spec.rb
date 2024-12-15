@@ -26,7 +26,7 @@ describe 'filebeat::lwrp_test' do
 
   context 'rhel-install' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new(step_into: ['filebeat_install'], platform: 'centos', version: '6.8') do |node|
+      ChefSpec::SoloRunner.new(step_into: ['filebeat_install'], platform: 'centos', version: '6') do |node|
         node.automatic['platform_family'] = 'rhel'
       end.converge(described_recipe)
     end
@@ -50,7 +50,7 @@ describe 'filebeat::lwrp_test' do
 
   context 'ubuntu-install' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new(step_into: ['filebeat_install'], platform: 'ubuntu', version: '14.04') do |node|
+      ChefSpec::SoloRunner.new(step_into: ['filebeat_install'], platform: 'ubuntu', version: '24.04') do |node|
         node.automatic['platform_family'] = 'debian'
       end.converge(described_recipe)
     end
@@ -128,7 +128,7 @@ describe 'filebeat::lwrp_test' do
 
   context 'rhel-service' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new(step_into: ['filebeat_service'], platform: 'centos', version: '6.8') do |node|
+      ChefSpec::SoloRunner.new(step_into: ['filebeat_service'], platform: 'centos', version: '6') do |node|
         node.automatic['platform_family'] = 'rhel'
       end.converge(described_recipe)
     end
@@ -140,7 +140,7 @@ describe 'filebeat::lwrp_test' do
 
   context 'ubuntu-service' do
     let(:chef_run) do
-      ChefSpec::SoloRunner.new(step_into: ['filebeat_service'], platform: 'ubuntu', version: '14.04') do |node|
+      ChefSpec::SoloRunner.new(step_into: ['filebeat_service'], platform: 'ubuntu', version: '24.04') do |node|
         node.automatic['platform_family'] = 'debian'
       end.converge(described_recipe)
     end
