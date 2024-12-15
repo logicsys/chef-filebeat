@@ -37,7 +37,7 @@ action :create do
 
   ## install filebeat MacOS
   if platform?('mac_os_x')
-    include_recipe 'homebrew'
+    # include_recipe 'homebrew'
 
     # The brew package does not create the 'filebeat' directory in '/etc'.
     directory '/etc/filebeat' do

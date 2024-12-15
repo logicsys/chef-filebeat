@@ -8,7 +8,7 @@ source_url 'https://github.com/vkhatri/chef-filebeat'
 issues_url 'https://github.com/vkhatri/chef-filebeat/issues'
 chef_version '>= 12.14'
 
-depends 'homebrew', '~> 4.2'
+# depends 'homebrew', '~> 4.2'
 depends 'elastic_repo', '>= 1.1.1'
 depends 'yum-plugin-versionlock', '>= 0.1.2'
 depends 'runit'
